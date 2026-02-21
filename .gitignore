@@ -1,0 +1,27 @@
+# OS
+.DS_Store
+
+# Node
+node_modules/
+
+# Expo
+.expo/
+dist/
+app/ios/
+
+# Firebase credentials（git管理しない）
+app/GoogleService-Info.plist
+app/google-services.json
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.backup
+infra/*.tfvars
+
+# Environment variables
+.env
+.env.local
+
+# Requirements doc（git管理しない）
+requirements.md
