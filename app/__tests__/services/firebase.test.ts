@@ -7,6 +7,10 @@ jest.mock('firebase/auth', () => ({
   getAuth: jest.fn(() => ({ currentUser: null })),
 }));
 
+jest.mock('firebase/firestore', () => ({
+  getFirestore: jest.fn(() => ({})),
+}));
+
 describe('firebase service', () => {
   beforeEach(() => {
     jest.resetModules();
