@@ -89,17 +89,8 @@ auto-habit/
 
 MVP開発中（Phase 1）
 
-実装順序：
-1. プロジェクト立ち上げ
-2. Firebase接続・匿名認証
-3. オンボーディング画面
-4. ホーム画面
-5. 通知機能
-6. カレンダー画面
-7. 設定画面
-8. Terraform構築（Firebaseリソース）
-9. AdMob組み込み
-10. App Store申請
+実装順序と進捗は `doc/progress.md` を参照すること（ローカル管理・gitignore済み）。
+完了したステップは `doc/progress.md` のチェックボックスにチェックを入れること。
 
 ## 環境構成
 
