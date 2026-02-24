@@ -1,6 +1,6 @@
 import { collection, addDoc, getDocs, query, limit, serverTimestamp } from 'firebase/firestore';
 import { db } from './firebase';
-import type { HabitInput } from '../types/habit';
+import type { Habit, HabitInput } from '../types/habit';
 
 export const createHabit = async (uid: string, input: HabitInput): Promise<string> => {
   const ref = collection(db, 'users', uid, 'habits');
@@ -9,6 +9,15 @@ export const createHabit = async (uid: string, input: HabitInput): Promise<strin
     createdAt: serverTimestamp(),
   });
   return doc.id;
+};
+
+export const getHabit = async (uid: string): Promise<Habit | null> => {
+  const ref = collection(db, 'users', uid, 'habits');
+  const q = query(ref, limit(1));
+  const snapshot = await getDocs(q);
+  if (snapshot.empty) return null;
+  const doc = snapshot.docs[0];
+  return { id: doc.id, ...(doc.data() as Omit<Habit, 'id'>) };
 };
 
 // 全件取得を避けるためlimit(1)で存在確認のみ行う

@@ -1,16 +1,24 @@
 import { renderHook, act } from '@testing-library/react-native';
 import { useHabit } from '../../src/hooks/useHabit';
 import type { User } from 'firebase/auth';
+import type { Habit } from '../../src/types/habit';
 
-const mockHasHabit = jest.fn();
+const mockGetHabit = jest.fn();
 const mockCreateHabit = jest.fn();
 
 jest.mock('../../src/services/habitService', () => ({
-  hasHabit: (...args: unknown[]) => mockHasHabit(...args),
+  getHabit: (...args: unknown[]) => mockGetHabit(...args),
   createHabit: (...args: unknown[]) => mockCreateHabit(...args),
 }));
 
 const mockUser = { uid: 'user-1' } as User;
+
+const mockHabit: Habit = {
+  id: 'habit-id-1',
+  name: 'ランニング',
+  schedule: { type: 'daily', hour: 7, minute: 0 },
+  createdAt: new Date('2026-01-01'),
+};
 
 describe('useHabit', () => {
   beforeEach(() => {
@@ -18,7 +26,7 @@ describe('useHabit', () => {
   });
 
   it('初期状態はloading: true, hasHabit: null', () => {
-    mockHasHabit.mockResolvedValue(false);
+    mockGetHabit.mockResolvedValue(null);
 
     const { result } = renderHook(() => useHabit(mockUser));
 
@@ -26,36 +34,39 @@ describe('useHabit', () => {
     expect(result.current.hasHabit).toBeNull();
   });
 
-  it('userがnullの場合はloading: falseになる', async () => {
+  it('userがnullの場合はloading: false, hasHabit: falseになる', async () => {
     const { result } = renderHook(() => useHabit(null));
     await act(async () => {});
 
     expect(result.current.loading).toBe(false);
-    expect(result.current.hasHabit).toBeNull();
+    expect(result.current.hasHabit).toBe(false);
   });
 
-  it('習慣が存在する場合はhasHabit: trueになる', async () => {
-    mockHasHabit.mockResolvedValue(true);
+  it('習慣が存在する場合はhasHabit: true、habit: Habitオブジェクトになる', async () => {
+    mockGetHabit.mockResolvedValue(mockHabit);
 
     const { result } = renderHook(() => useHabit(mockUser));
     await act(async () => {});
 
     expect(result.current.hasHabit).toBe(true);
+    expect(result.current.habit).toEqual(mockHabit);
     expect(result.current.loading).toBe(false);
   });
 
-  it('習慣が存在しない場合はhasHabit: falseになる', async () => {
-    mockHasHabit.mockResolvedValue(false);
+  it('習慣が存在しない場合はhasHabit: false、habit: nullになる', async () => {
+    mockGetHabit.mockResolvedValue(null);
 
     const { result } = renderHook(() => useHabit(mockUser));
     await act(async () => {});
 
     expect(result.current.hasHabit).toBe(false);
+    expect(result.current.habit).toBeNull();
     expect(result.current.loading).toBe(false);
   });
 
-  it('createHabitを呼ぶとhasHabit: trueになる', async () => {
-    mockHasHabit.mockResolvedValue(false);
+  it('createHabitを呼ぶとhasHabit: true、habit: Habitオブジェクトになる', async () => {
+    // 初回はnull、createHabit後の再取得でhabitを返す
+    mockGetHabit.mockResolvedValueOnce(null).mockResolvedValueOnce(mockHabit);
     mockCreateHabit.mockResolvedValue('habit-id-1');
 
     const { result } = renderHook(() => useHabit(mockUser));
@@ -66,5 +77,6 @@ describe('useHabit', () => {
     });
 
     expect(result.current.hasHabit).toBe(true);
+    expect(result.current.habit).toEqual(mockHabit);
   });
 });

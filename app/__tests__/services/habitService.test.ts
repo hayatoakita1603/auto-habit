@@ -18,7 +18,7 @@ jest.mock('firebase/firestore', () => ({
   serverTimestamp: () => mockServerTimestamp(),
 }));
 
-import { createHabit, hasHabit } from '../../src/services/habitService';
+import { createHabit, hasHabit, getHabit } from '../../src/services/habitService';
 import type { HabitInput } from '../../src/types/habit';
 
 const mockInput: HabitInput = {
@@ -49,6 +49,45 @@ describe('habitService', () => {
         })
       );
       expect(id).toBe('habit-id-1');
+    });
+  });
+
+  describe('getHabit', () => {
+    it('最初のhabitsドキュメントをHabitオブジェクトとして返す', async () => {
+      const mockDoc = {
+        id: 'habit-id-1',
+        data: () => ({
+          name: 'ランニング',
+          schedule: { type: 'daily', hour: 7, minute: 0 },
+          createdAt: 'server-timestamp',
+        }),
+      };
+      mockGetDocs.mockResolvedValue({ empty: false, docs: [mockDoc] });
+
+      const habit = await getHabit('user-1');
+
+      expect(habit).toEqual({
+        id: 'habit-id-1',
+        name: 'ランニング',
+        schedule: { type: 'daily', hour: 7, minute: 0 },
+        createdAt: 'server-timestamp',
+      });
+    });
+
+    it('habitが存在しない場合はnullを返す', async () => {
+      mockGetDocs.mockResolvedValue({ empty: true, docs: [] });
+
+      const habit = await getHabit('user-1');
+
+      expect(habit).toBeNull();
+    });
+
+    it('limit(1)で最小限のクエリを発行する', async () => {
+      mockGetDocs.mockResolvedValue({ empty: true, docs: [] });
+
+      await getHabit('user-1');
+
+      expect(mockLimit).toHaveBeenCalledWith(1);
     });
   });
 
