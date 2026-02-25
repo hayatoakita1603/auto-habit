@@ -2,8 +2,11 @@ import { View, Text, StyleSheet } from 'react-native';
 import { useAuth } from './src/hooks/useAuth';
 import { useHabit } from './src/hooks/useHabit';
 import { useAchievement } from './src/hooks/useAchievement';
+import { useNotification } from './src/hooks/useNotification';
+import { savePhotos } from './src/services/photoService';
 import { OnboardingScreen } from './src/screens/OnboardingScreen';
 import { HomeScreen } from './src/screens/HomeScreen';
+import type { HabitInput } from './src/types/habit';
 
 export default function App() {
   const { user, loading: authLoading, error: authError } = useAuth();
@@ -11,6 +14,16 @@ export default function App() {
   const { todayDone, streak, loading: achievementLoading, markDone } = useAchievement(
     hasHabit ? user : null
   );
+  // habitが設定されたタイミングで通知をスケジュールする
+  useNotification(user, habit);
+
+  // 写真を先に保存してからhaitを作成する（通知スケジュール時に写真が参照できるようにする）
+  const handleOnboardingComplete = async (input: HabitInput, photoUris: string[]) => {
+    if (user) {
+      await savePhotos(user.uid, photoUris);
+    }
+    await createHabit(input);
+  };
 
   if (authLoading || habitLoading || achievementLoading) {
     return (
@@ -29,7 +42,7 @@ export default function App() {
   }
 
   if (!hasHabit) {
-    return <OnboardingScreen onComplete={createHabit} />;
+    return <OnboardingScreen onComplete={handleOnboardingComplete} />;
   }
 
   return (
