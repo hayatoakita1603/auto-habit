@@ -1,4 +1,4 @@
-import { doc, collection, setDoc, getDoc, getDocs, serverTimestamp } from 'firebase/firestore';
+import { doc, collection, setDoc, getDoc, getDocs, serverTimestamp, query, where, documentId } from 'firebase/firestore';
 import { db } from './firebase';
 import { formatDate } from '../utils/date';
 
@@ -11,6 +11,18 @@ export const getTodayAchievement = async (uid: string, date: string): Promise<bo
   const ref = doc(db, 'users', uid, 'achievements', date);
   const snapshot = await getDoc(ref);
   return snapshot.exists();
+};
+
+export const getAchievementsByMonth = async (uid: string, year: number, month: number): Promise<Set<string>> => {
+  const m = String(month).padStart(2, '0');
+  const ref = collection(db, 'users', uid, 'achievements');
+  const q = query(
+    ref,
+    where(documentId(), '>=', `${year}-${m}-01`),
+    where(documentId(), '<=', `${year}-${m}-31`),
+  );
+  const snapshot = await getDocs(q);
+  return new Set(snapshot.docs.map(d => d.id));
 };
 
 export const getStreak = async (uid: string, today: string): Promise<number> => {
