@@ -1,22 +1,31 @@
-import { View, Text, Button, StyleSheet } from 'react-native';
-import type { Habit } from '../types/habit';
+import { View, Text, Button, ActivityIndicator, StyleSheet } from 'react-native';
+import { useUser } from '../contexts/UserContext';
+import { useHabit } from '../hooks/useHabit';
+import { useAchievement } from '../hooks/useAchievement';
 
-type Props = {
-  habit: Habit;
-  streak: number;
-  todayDone: boolean;
-  onMarkDone: () => void;
-};
+export const HomeScreen = () => {
+  const { user } = useUser();
+  const { hasHabit, habit, loading: habitLoading } = useHabit(user);
+  const { todayDone, streak, loading: achievementLoading, markDone } = useAchievement(
+    hasHabit ? user : null
+  );
 
-export const HomeScreen = ({ habit, streak, todayDone, onMarkDone }: Props) => {
+  if (habitLoading || achievementLoading) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator />
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
-      <Text style={styles.habitName}>{habit.name}</Text>
+      <Text style={styles.habitName}>{habit?.name}</Text>
       <Text style={styles.streak}>{streak}日連続達成</Text>
       {todayDone ? (
         <Text style={styles.done}>今日は達成済み！</Text>
       ) : (
-        <Button title="今日達成した！" onPress={onMarkDone} />
+        <Button title="今日達成した！" onPress={markDone} />
       )}
     </View>
   );

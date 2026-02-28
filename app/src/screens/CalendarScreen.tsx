@@ -1,16 +1,9 @@
 import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
+import { useUser } from '../contexts/UserContext';
+import { useCalendar } from '../hooks/useCalendar';
 import { formatDate } from '../utils/date';
 
 const WEEKDAY_LABELS = ['日', '月', '火', '水', '木', '金', '土'];
-
-type Props = {
-  year: number;
-  month: number;
-  achievedDates: Set<string>;
-  loading: boolean;
-  onPrevMonth: () => void;
-  onNextMonth: () => void;
-};
 
 const buildCalendarDays = (year: number, month: number): (number | null)[] => {
   // month は 1-12
@@ -23,18 +16,20 @@ const buildCalendarDays = (year: number, month: number): (number | null)[] => {
   return days;
 };
 
-export const CalendarScreen = ({ year, month, achievedDates, loading, onPrevMonth, onNextMonth }: Props) => {
+export const CalendarScreen = () => {
+  const { user } = useUser();
+  const { year, month, achievedDates, loading, goToPrevMonth, goToNextMonth } = useCalendar(user);
   const days = buildCalendarDays(year, month);
   const today = formatDate(new Date());
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={onPrevMonth} style={styles.navButton}>
+        <TouchableOpacity onPress={goToPrevMonth} style={styles.navButton}>
           <Text style={styles.navText}>{'‹'}</Text>
         </TouchableOpacity>
         <Text style={styles.title}>{year}年{month}月</Text>
-        <TouchableOpacity onPress={onNextMonth} style={styles.navButton}>
+        <TouchableOpacity onPress={goToNextMonth} style={styles.navButton}>
           <Text style={styles.navText}>{'›'}</Text>
         </TouchableOpacity>
       </View>
