@@ -19,6 +19,7 @@ import { usePhotos } from '../hooks/usePhotos';
 import { colors } from '../constants/colors';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
+const CIRCLE_SIZE = 260;
 
 export const HomeScreen = () => {
   const { user } = useUser();
@@ -41,8 +42,19 @@ export const HomeScreen = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.habitName}>{habit?.name}</Text>
-      <Text style={styles.streak}>{streak}日連続達成</Text>
+      <View style={styles.centerArea}>
+        {todayDone ? (
+          <View style={[styles.circle, styles.circleDone]}>
+            <Text style={styles.habitNameDone}>{habit?.name}</Text>
+            <Text style={styles.doneBadge}>達成！</Text>
+          </View>
+        ) : (
+          <TouchableOpacity style={[styles.circle, styles.circleUndone]} onPress={markDone} activeOpacity={0.7}>
+            <Text style={styles.habitName}>{habit?.name}</Text>
+            <Text style={styles.tapHint}>タップして達成</Text>
+          </TouchableOpacity>
+        )}
+      </View>
 
       {photoPaths.length > 0 && (
         <TouchableOpacity style={styles.photoRow} onPress={() => setGalleryVisible(true)}>
@@ -51,15 +63,10 @@ export const HomeScreen = () => {
         </TouchableOpacity>
       )}
 
-      {todayDone ? (
-        <View style={styles.doneButton}>
-          <Text style={styles.doneText}>今日は達成済み！</Text>
-        </View>
-      ) : (
-        <TouchableOpacity style={styles.markDoneButton} onPress={markDone}>
-          <Text style={styles.markDoneText}>今日達成した！</Text>
-        </TouchableOpacity>
-      )}
+      <View style={styles.streakArea}>
+        <Text style={styles.streakNumber}>{streak}</Text>
+        <Text style={styles.streakLabel}>日連続達成</Text>
+      </View>
 
       <Modal visible={galleryVisible} animationType="slide" onRequestClose={() => setGalleryVisible(false)}>
         <SafeAreaProvider>
@@ -83,59 +90,84 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 48,
     backgroundColor: colors.background,
   },
-  habitName: {
-    fontSize: 24,
-    color: colors.textPrimary,
-    fontWeight: 'bold',
+  centerArea: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  streak: {
-    fontSize: 18,
-    marginTop: 16,
-    color: colors.accent,
+  circle: {
+    width: CIRCLE_SIZE,
+    height: CIRCLE_SIZE,
+    borderRadius: CIRCLE_SIZE / 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  circleUndone: {
+    borderWidth: 4,
+    borderColor: colors.accent,
+    backgroundColor: colors.background,
+  },
+  circleDone: {
+    backgroundColor: colors.accent,
+  },
+  habitName: {
+    fontSize: 26,
+    fontWeight: 'bold',
+    color: colors.textPrimary,
+    textAlign: 'center',
+    paddingHorizontal: 24,
+  },
+  habitNameDone: {
+    fontSize: 26,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+    textAlign: 'center',
+    paddingHorizontal: 24,
+  },
+  tapHint: {
+    marginTop: 12,
+    fontSize: 13,
+    color: colors.textSecondary,
+  },
+  doneBadge: {
+    marginTop: 12,
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
   },
   photoRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 20,
-    marginBottom: 4,
+    marginBottom: 8,
     gap: 12,
   },
   thumbnail: {
-    width: 60,
-    height: 60,
+    width: 48,
+    height: 48,
     borderRadius: 8,
   },
   photoLabel: {
-    fontSize: 16,
+    fontSize: 14,
     color: colors.accent,
   },
-  markDoneButton: {
-    marginTop: 24,
-    backgroundColor: colors.accent,
-    paddingVertical: 14,
-    paddingHorizontal: 40,
-    borderRadius: 12,
+  streakArea: {
+    alignItems: 'center',
+    paddingBottom: 8,
   },
-  markDoneText: {
-    color: '#FFFFFF',
-    fontSize: 16,
+  streakNumber: {
+    fontSize: 48,
     fontWeight: 'bold',
+    color: colors.accent,
+    lineHeight: 56,
   },
-  doneButton: {
-    marginTop: 24,
-    backgroundColor: colors.surface,
-    paddingVertical: 14,
-    paddingHorizontal: 40,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  doneText: {
+  streakLabel: {
+    fontSize: 14,
     color: colors.textSecondary,
-    fontSize: 16,
+    marginTop: 4,
   },
   modalContainer: {
     flex: 1,
