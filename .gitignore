@@ -17,7 +17,7 @@ app/google-services.json
 .terraform/
 *.tfstate
 *.tfstate.backup
-infra/*.tfvars
+infra/**/*.tfvars
 
 # Environment variables
 .env

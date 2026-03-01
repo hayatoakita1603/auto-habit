@@ -1,0 +1,6 @@
+# このファイルを terraform.tfvars にコピーして実際の値を入力する
+# terraform.tfvars は git 管理しない（.gitignore 済み）
+
+project_id         = "your-staging-project-id"
+region             = "asia-northeast1"
+firestore_location = "asia-northeast1"
