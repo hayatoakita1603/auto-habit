@@ -24,7 +24,7 @@ const CIRCLE_SIZE = 260;
 export const HomeScreen = () => {
   const { user } = useUser();
   const { hasHabit, habit, loading: habitLoading } = useHabit(user);
-  const { todayDone, streak, loading: achievementLoading, markDone } = useAchievement(
+  const { todayDone, streak, loading: achievementLoading, markDone, cancelDone } = useAchievement(
     hasHabit ? user : null
   );
   const { photoPaths, refresh: refreshPhotos } = usePhotos(user);
@@ -44,10 +44,15 @@ export const HomeScreen = () => {
     <View style={styles.container}>
       <View style={styles.centerArea}>
         {todayDone ? (
-          <View style={[styles.circle, styles.circleDone]}>
-            <Text style={styles.habitNameDone}>{habit?.name}</Text>
-            <Text style={styles.doneBadge}>達成！</Text>
-          </View>
+          <>
+            <View style={[styles.circle, styles.circleDone]}>
+              <Text style={styles.habitNameDone}>{habit?.name}</Text>
+              <Text style={styles.doneBadge}>達成！</Text>
+            </View>
+            <TouchableOpacity style={styles.cancelButton} onPress={cancelDone}>
+              <Text style={styles.cancelText}>取り消す</Text>
+            </TouchableOpacity>
+          </>
         ) : (
           <TouchableOpacity style={[styles.circle, styles.circleUndone]} onPress={markDone} activeOpacity={0.7}>
             <Text style={styles.habitName}>{habit?.name}</Text>
@@ -153,6 +158,14 @@ const styles = StyleSheet.create({
   photoLabel: {
     fontSize: 14,
     color: colors.accent,
+  },
+  cancelButton: {
+    marginTop: 16,
+  },
+  cancelText: {
+    fontSize: 13,
+    color: colors.textSecondary,
+    textDecorationLine: 'underline',
   },
   streakArea: {
     alignItems: 'center',

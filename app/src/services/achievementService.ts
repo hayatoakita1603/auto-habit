@@ -1,10 +1,15 @@
-import { doc, collection, setDoc, getDoc, getDocs, serverTimestamp, query, where, documentId } from 'firebase/firestore';
+import { doc, collection, setDoc, getDoc, getDocs, deleteDoc, serverTimestamp, query, where, documentId } from 'firebase/firestore';
 import { db } from './firebase';
 import { formatDate } from '../utils/date';
 
 export const addAchievement = async (uid: string, date: string): Promise<void> => {
   const ref = doc(db, 'users', uid, 'achievements', date);
   await setDoc(ref, { completedAt: serverTimestamp() });
+};
+
+export const deleteAchievement = async (uid: string, date: string): Promise<void> => {
+  const ref = doc(db, 'users', uid, 'achievements', date);
+  await deleteDoc(ref);
 };
 
 export const getTodayAchievement = async (uid: string, date: string): Promise<boolean> => {

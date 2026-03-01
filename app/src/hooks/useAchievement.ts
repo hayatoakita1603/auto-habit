@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { User } from 'firebase/auth';
-import { addAchievement, getTodayAchievement, getStreak } from '../services/achievementService';
+import { addAchievement, deleteAchievement, getTodayAchievement, getStreak } from '../services/achievementService';
 import { formatDate } from '../utils/date';
 
 type AchievementState = {
@@ -8,6 +8,7 @@ type AchievementState = {
   streak: number;
   loading: boolean;
   markDone: () => Promise<void>;
+  cancelDone: () => Promise<void>;
 };
 
 export const useAchievement = (user: User | null): AchievementState => {
@@ -41,5 +42,13 @@ export const useAchievement = (user: User | null): AchievementState => {
     setStreak(s => s + 1);
   }, [user]);
 
-  return { todayDone, streak, loading, markDone };
+  const cancelDone = useCallback(async () => {
+    if (!user) return;
+    const today = formatDate(new Date());
+    await deleteAchievement(user.uid, today);
+    setTodayDone(false);
+    setStreak(s => Math.max(0, s - 1));
+  }, [user]);
+
+  return { todayDone, streak, loading, markDone, cancelDone };
 };
