@@ -9,6 +9,7 @@ type CalendarState = {
   loading: boolean;
   goToPrevMonth: () => void;
   goToNextMonth: () => void;
+  refresh: () => void;
 };
 
 export const useCalendar = (user: User | null): CalendarState => {
@@ -17,6 +18,7 @@ export const useCalendar = (user: User | null): CalendarState => {
   const [month, setMonth] = useState(now.getMonth() + 1);
   const [achievedDates, setAchievedDates] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     if (!user) {
@@ -28,7 +30,7 @@ export const useCalendar = (user: User | null): CalendarState => {
     getAchievementsByMonth(user.uid, year, month)
       .then(dates => setAchievedDates(dates))
       .finally(() => setLoading(false));
-  }, [user, year, month]);
+  }, [user, year, month, refreshKey]);
 
   const goToPrevMonth = useCallback(() => {
     setMonth(m => {
@@ -50,5 +52,7 @@ export const useCalendar = (user: User | null): CalendarState => {
     });
   }, []);
 
-  return { year, month, achievedDates, loading, goToPrevMonth, goToNextMonth };
+  const refresh = useCallback(() => setRefreshKey(k => k + 1), []);
+
+  return { year, month, achievedDates, loading, goToPrevMonth, goToNextMonth, refresh };
 };

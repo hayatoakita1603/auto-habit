@@ -1,4 +1,6 @@
+import { useCallback } from 'react';
 import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { useUser } from '../contexts/UserContext';
 import { useCalendar } from '../hooks/useCalendar';
 import { formatDate } from '../utils/date';
@@ -18,7 +20,10 @@ const buildCalendarDays = (year: number, month: number): (number | null)[] => {
 
 export const CalendarScreen = () => {
   const { user } = useUser();
-  const { year, month, achievedDates, loading, goToPrevMonth, goToNextMonth } = useCalendar(user);
+  const { year, month, achievedDates, loading, goToPrevMonth, goToNextMonth, refresh } = useCalendar(user);
+
+  // タブ切り替え後も最新データを表示するためフォーカス時に再フェッチする
+  useFocusEffect(useCallback(() => { refresh(); }, [refresh]));
   const days = buildCalendarDays(year, month);
   const today = formatDate(new Date());
 

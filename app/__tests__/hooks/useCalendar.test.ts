@@ -131,4 +131,18 @@ describe('useCalendar', () => {
     expect(mockGetAchievementsByMonth).toHaveBeenCalledTimes(2);
     expect(mockGetAchievementsByMonth).toHaveBeenLastCalledWith('user-1', 2026, 1);
   });
+
+  it('refreshを呼ぶと同じ月で再フェッチする', async () => {
+    mockGetAchievementsByMonth.mockResolvedValue(new Set());
+
+    const { result } = renderHook(() => useCalendar(mockUser));
+    await act(async () => {});
+
+    await act(async () => {
+      result.current.refresh();
+    });
+
+    expect(mockGetAchievementsByMonth).toHaveBeenCalledTimes(2);
+    expect(mockGetAchievementsByMonth).toHaveBeenLastCalledWith('user-1', 2026, 2);
+  });
 });
