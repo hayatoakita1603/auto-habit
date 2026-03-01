@@ -11,7 +11,7 @@ import {
   ScrollView,
   Dimensions,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { useUser } from '../contexts/UserContext';
 import { useHabit } from '../hooks/useHabit';
 import { useAchievement } from '../hooks/useAchievement';
@@ -53,6 +53,7 @@ export const HomeScreen = () => {
       )}
 
       <Modal visible={galleryVisible} animationType="slide" onRequestClose={() => setGalleryVisible(false)}>
+        <SafeAreaProvider>
         <SafeAreaView style={styles.modalContainer}>
           <TouchableOpacity style={styles.closeButton} onPress={() => setGalleryVisible(false)}>
             <Text style={styles.closeText}>×</Text>
@@ -63,6 +64,7 @@ export const HomeScreen = () => {
             ))}
           </ScrollView>
         </SafeAreaView>
+        </SafeAreaProvider>
       </Modal>
     </View>
   );

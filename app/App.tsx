@@ -1,4 +1,5 @@
 import { View, Text, StyleSheet } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
 import { useAuth } from './src/hooks/useAuth';
 import { useHabit } from './src/hooks/useHabit';
@@ -23,33 +24,34 @@ export default function App() {
     await createHabit(input);
   };
 
-  if (authLoading || habitLoading) {
+  const renderContent = () => {
+    if (authLoading || habitLoading) {
+      return (
+        <View style={styles.container}>
+          <Text>読み込み中...</Text>
+        </View>
+      );
+    }
+    if (authError) {
+      return (
+        <View style={styles.container}>
+          <Text>認証エラー: {authError.message}</Text>
+        </View>
+      );
+    }
+    if (!hasHabit) {
+      return <OnboardingScreen onComplete={handleOnboardingComplete} />;
+    }
     return (
-      <View style={styles.container}>
-        <Text>読み込み中...</Text>
-      </View>
+      <UserProvider value={{ user }}>
+        <NavigationContainer>
+          <AppNavigator />
+        </NavigationContainer>
+      </UserProvider>
     );
-  }
+  };
 
-  if (authError) {
-    return (
-      <View style={styles.container}>
-        <Text>認証エラー: {authError.message}</Text>
-      </View>
-    );
-  }
-
-  if (!hasHabit) {
-    return <OnboardingScreen onComplete={handleOnboardingComplete} />;
-  }
-
-  return (
-    <UserProvider value={{ user }}>
-      <NavigationContainer>
-        <AppNavigator />
-      </NavigationContainer>
-    </UserProvider>
-  );
+  return <SafeAreaProvider>{renderContent()}</SafeAreaProvider>;
 }
 
 const styles = StyleSheet.create({

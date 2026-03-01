@@ -6,7 +6,7 @@ import {
   StyleSheet,
   Modal,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { useUser } from '../contexts/UserContext';
 import { loadPhotoPaths } from '../services/photoService';
@@ -65,7 +65,9 @@ export const SettingsScreen = () => {
         animationType="slide"
         onRequestClose={() => setHabitModalVisible(false)}
       >
-        <HabitSettingsScreen onClose={() => setHabitModalVisible(false)} />
+        <SafeAreaProvider>
+          <HabitSettingsScreen onClose={() => setHabitModalVisible(false)} />
+        </SafeAreaProvider>
       </Modal>
 
       <Modal
@@ -73,7 +75,9 @@ export const SettingsScreen = () => {
         animationType="slide"
         onRequestClose={handleClosePhotoModal}
       >
-        <PhotoSettingsScreen onClose={handleClosePhotoModal} />
+        <SafeAreaProvider>
+          <PhotoSettingsScreen onClose={handleClosePhotoModal} />
+        </SafeAreaProvider>
       </Modal>
     </SafeAreaView>
   );
