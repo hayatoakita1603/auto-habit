@@ -68,6 +68,7 @@ export const OnboardingScreen = ({ onComplete }: Props) => {
       <SafeAreaView style={styles.container}>
         <View style={styles.content}>
           <Text style={styles.title}>習慣化したいことは{'\n'}何ですか？</Text>
+          <Text style={styles.advice}>最初は小さく始めるのがコツ。続けることが大切です。</Text>
           <TextInput
             style={styles.input}
             value={habitName}
@@ -94,6 +95,7 @@ export const OnboardingScreen = ({ onComplete }: Props) => {
       <SafeAreaView style={styles.container}>
         <View style={styles.content}>
           <Text style={styles.title}>毎日何時に{'\n'}通知しますか？</Text>
+          <Text style={styles.advice}>毎日同じ時間に通知が来ると、習慣化しやすくなりますよ。</Text>
           <DateTimePicker
             mode="time"
             value={time}
@@ -114,6 +116,7 @@ export const OnboardingScreen = ({ onComplete }: Props) => {
       <SafeAreaView style={styles.container}>
         <View style={styles.content}>
           <Text style={styles.title}>通知に表示する{'\n'}写真を選びますか？</Text>
+          <Text style={styles.advice}>なりたい自分や達成後のイメージ写真を設定すると、モチベーションが続きやすいですよ！</Text>
           <Text style={styles.description}>
             最大{MAX_PHOTOS}枚まで設定できます。通知のたびにランダムで1枚表示されます。
           </Text>
@@ -134,17 +137,25 @@ export const OnboardingScreen = ({ onComplete }: Props) => {
               </View>
             ))}
           </ScrollView>
-          {photoUris.length < MAX_PHOTOS && (
-            <TouchableOpacity style={styles.addPhotoButton} onPress={handlePickPhoto}>
-              <Text style={styles.addPhotoButtonText}>写真を追加</Text>
+        </View>
+        <View style={styles.step3Actions}>
+          {photoUris.length < MAX_PHOTOS ? (
+            <>
+              <TouchableOpacity style={styles.button} onPress={handlePickPhoto}>
+                <Text style={styles.buttonText}>写真を追加</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.skipButton} onPress={() => setStep(4)}>
+                <Text style={styles.skipButtonText}>
+                  {photoUris.length === 0 ? 'スキップ' : '次へ'}
+                </Text>
+              </TouchableOpacity>
+            </>
+          ) : (
+            <TouchableOpacity style={styles.button} onPress={() => setStep(4)}>
+              <Text style={styles.buttonText}>次へ</Text>
             </TouchableOpacity>
           )}
         </View>
-        <TouchableOpacity style={styles.button} onPress={() => setStep(4)}>
-          <Text style={styles.buttonText}>
-            {photoUris.length === 0 ? 'スキップ' : '次へ'}
-          </Text>
-        </TouchableOpacity>
       </SafeAreaView>
     );
   }
@@ -153,6 +164,7 @@ export const OnboardingScreen = ({ onComplete }: Props) => {
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
         <Text style={styles.title}>もう少しで完了です</Text>
+        <Text style={styles.advice}>あとは続けるだけ。応援しています！</Text>
         <Text style={styles.summary}>
           毎日 <Text style={styles.highlight}>{formattedTime}</Text> に{'\n'}「
           <Text style={styles.highlight}>{habitName}</Text>」の{'\n'}リマインドをお送りします。
@@ -207,6 +219,13 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: colors.accent,
   },
+  advice: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    lineHeight: 22,
+    marginBottom: 32,
+    fontStyle: 'italic',
+  },
   description: {
     fontSize: 14,
     color: colors.textSecondary,
@@ -242,16 +261,16 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 16,
   },
-  addPhotoButton: {
-    borderWidth: 1,
-    borderColor: colors.accent,
-    borderRadius: 8,
-    paddingVertical: 10,
+  step3Actions: {
+    gap: 12,
+  },
+  skipButton: {
+    paddingVertical: 12,
     alignItems: 'center',
   },
-  addPhotoButtonText: {
+  skipButtonText: {
     fontSize: 15,
-    color: colors.accent,
+    color: colors.textSecondary,
   },
   button: {
     backgroundColor: colors.accent,
