@@ -2,7 +2,6 @@ import { useState, useCallback } from 'react';
 import {
   View,
   Text,
-  Button,
   ActivityIndicator,
   StyleSheet,
   TouchableOpacity,
@@ -17,6 +16,7 @@ import { useUser } from '../contexts/UserContext';
 import { useHabit } from '../hooks/useHabit';
 import { useAchievement } from '../hooks/useAchievement';
 import { usePhotos } from '../hooks/usePhotos';
+import { colors } from '../constants/colors';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
@@ -34,7 +34,7 @@ export const HomeScreen = () => {
   if (habitLoading || achievementLoading) {
     return (
       <View style={styles.container}>
-        <ActivityIndicator />
+        <ActivityIndicator color={colors.accent} />
       </View>
     );
   }
@@ -43,30 +43,36 @@ export const HomeScreen = () => {
     <View style={styles.container}>
       <Text style={styles.habitName}>{habit?.name}</Text>
       <Text style={styles.streak}>{streak}日連続達成</Text>
+
       {photoPaths.length > 0 && (
         <TouchableOpacity style={styles.photoRow} onPress={() => setGalleryVisible(true)}>
           <Image source={{ uri: photoPaths[0] }} style={styles.thumbnail} />
           <Text style={styles.photoLabel}>モチベ写真を見る ›</Text>
         </TouchableOpacity>
       )}
+
       {todayDone ? (
-        <Text style={styles.done}>今日は達成済み！</Text>
+        <View style={styles.doneButton}>
+          <Text style={styles.doneText}>今日は達成済み！</Text>
+        </View>
       ) : (
-        <Button title="今日達成した！" onPress={markDone} />
+        <TouchableOpacity style={styles.markDoneButton} onPress={markDone}>
+          <Text style={styles.markDoneText}>今日達成した！</Text>
+        </TouchableOpacity>
       )}
 
       <Modal visible={galleryVisible} animationType="slide" onRequestClose={() => setGalleryVisible(false)}>
         <SafeAreaProvider>
-        <SafeAreaView style={styles.modalContainer}>
-          <TouchableOpacity style={styles.closeButton} onPress={() => setGalleryVisible(false)}>
-            <Text style={styles.closeText}>×</Text>
-          </TouchableOpacity>
-          <ScrollView>
-            {photoPaths.map((path) => (
-              <Image key={path} source={{ uri: path }} style={styles.fullPhoto} resizeMode="contain" />
-            ))}
-          </ScrollView>
-        </SafeAreaView>
+          <SafeAreaView style={styles.modalContainer}>
+            <TouchableOpacity style={styles.closeButton} onPress={() => setGalleryVisible(false)}>
+              <Text style={styles.closeText}>×</Text>
+            </TouchableOpacity>
+            <ScrollView>
+              {photoPaths.map((path) => (
+                <Image key={path} source={{ uri: path }} style={styles.fullPhoto} resizeMode="contain" />
+              ))}
+            </ScrollView>
+          </SafeAreaView>
         </SafeAreaProvider>
       </Modal>
     </View>
@@ -78,13 +84,17 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: colors.background,
   },
   habitName: {
     fontSize: 24,
+    color: colors.textPrimary,
+    fontWeight: 'bold',
   },
   streak: {
     fontSize: 18,
     marginTop: 16,
+    color: colors.accent,
   },
   photoRow: {
     flexDirection: 'row',
@@ -100,11 +110,32 @@ const styles = StyleSheet.create({
   },
   photoLabel: {
     fontSize: 16,
-    color: '#555',
+    color: colors.accent,
   },
-  done: {
+  markDoneButton: {
+    marginTop: 24,
+    backgroundColor: colors.accent,
+    paddingVertical: 14,
+    paddingHorizontal: 40,
+    borderRadius: 12,
+  },
+  markDoneText: {
+    color: '#FFFFFF',
     fontSize: 16,
-    marginTop: 16,
+    fontWeight: 'bold',
+  },
+  doneButton: {
+    marginTop: 24,
+    backgroundColor: colors.surface,
+    paddingVertical: 14,
+    paddingHorizontal: 40,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  doneText: {
+    color: colors.textSecondary,
+    fontSize: 16,
   },
   modalContainer: {
     flex: 1,
@@ -115,7 +146,7 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   closeText: {
-    color: '#fff',
+    color: '#FFFFFF',
     fontSize: 28,
   },
   fullPhoto: {

@@ -12,6 +12,7 @@ import { useUser } from '../contexts/UserContext';
 import { loadPhotoPaths } from '../services/photoService';
 import { HabitSettingsScreen } from './HabitSettingsScreen';
 import { PhotoSettingsScreen } from './PhotoSettingsScreen';
+import { colors } from '../constants/colors';
 
 export const SettingsScreen = () => {
   const { user } = useUser();
@@ -86,17 +87,17 @@ export const SettingsScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f2f2f7',
+    backgroundColor: colors.surface,
   },
   heading: {
     fontSize: 34,
     fontWeight: '700',
     paddingHorizontal: 20,
     paddingBottom: 12,
-    color: '#000',
+    color: colors.textPrimary,
   },
   list: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.background,
     borderRadius: 12,
     marginHorizontal: 16,
     overflow: 'hidden',
@@ -110,7 +111,7 @@ const styles = StyleSheet.create({
   },
   rowLabel: {
     fontSize: 17,
-    color: '#000',
+    color: colors.textPrimary,
   },
   rowRight: {
     flexDirection: 'row',
@@ -119,15 +120,15 @@ const styles = StyleSheet.create({
   },
   rowValue: {
     fontSize: 17,
-    color: '#8e8e93',
+    color: colors.textSecondary,
   },
   chevron: {
     fontSize: 20,
-    color: '#c7c7cc',
+    color: colors.accent,
   },
   separator: {
     height: StyleSheet.hairlineWidth,
-    backgroundColor: '#c6c6c8',
+    backgroundColor: colors.border,
     marginLeft: 16,
   },
 });

@@ -4,6 +4,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useUser } from '../contexts/UserContext';
 import { useCalendar } from '../hooks/useCalendar';
 import { formatDate } from '../utils/date';
+import { colors } from '../constants/colors';
 
 const WEEKDAY_LABELS = ['日', '月', '火', '水', '木', '金', '土'];
 
@@ -46,7 +47,7 @@ export const CalendarScreen = () => {
       </View>
 
       {loading ? (
-        <ActivityIndicator style={styles.loader} />
+        <ActivityIndicator style={styles.loader} color={colors.accent} />
       ) : (
         <View style={styles.grid}>
           {days.map((day, i) => {
@@ -59,12 +60,12 @@ export const CalendarScreen = () => {
             return (
               <View
                 key={dateStr}
-                style={[styles.cell, achieved && styles.achievedCell]}
+                style={[styles.cell, achieved && styles.achievedCell, isToday && styles.todayCell]}
               >
                 <Text style={[
                   styles.dayText,
-                  achieved && styles.achievedText,
                   isToday && styles.todayText,
+                  achieved && styles.achievedText,
                 ]}>
                   {day}
                 </Text>
@@ -81,6 +82,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
+    backgroundColor: colors.background,
   },
   header: {
     flexDirection: 'row',
@@ -93,11 +95,12 @@ const styles = StyleSheet.create({
   },
   navText: {
     fontSize: 28,
-    color: '#333',
+    color: colors.accent,
   },
   title: {
     fontSize: 18,
     fontWeight: 'bold',
+    color: colors.textPrimary,
   },
   weekRow: {
     flexDirection: 'row',
@@ -107,7 +110,7 @@ const styles = StyleSheet.create({
     flex: 1,
     textAlign: 'center',
     fontSize: 12,
-    color: '#666',
+    color: colors.textSecondary,
   },
   grid: {
     flexDirection: 'row',
@@ -121,18 +124,24 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   achievedCell: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: colors.accent,
+  },
+  todayCell: {
+    borderWidth: 1,
+    borderColor: colors.accent,
+    borderRadius: 4,
   },
   dayText: {
     fontSize: 14,
-    color: '#333',
+    color: colors.textSecondary,
   },
   achievedText: {
-    color: '#fff',
-    fontWeight: 'bold',
+    color: '#FFFFFF',
+    paddingBottom: 10,
   },
   todayText: {
-    textDecorationLine: 'underline',
+    color: colors.accent,
+    fontWeight: 'bold',
   },
   loader: {
     marginTop: 32,

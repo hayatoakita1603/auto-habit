@@ -14,6 +14,7 @@ import { useHabit } from '../hooks/useHabit';
 import { scheduleHabitNotification } from '../services/notificationService';
 import { loadPhotoPaths } from '../services/photoService';
 import type { Habit, HabitInput } from '../types/habit';
+import { colors } from '../constants/colors';
 
 type Props = {
   onClose: () => void;
@@ -39,7 +40,7 @@ export const HabitSettingsScreen = ({ onClose }: Props) => {
   if (loading) {
     return (
       <View style={styles.container}>
-        <ActivityIndicator />
+        <ActivityIndicator color={colors.accent} />
       </View>
     );
   }
@@ -81,7 +82,7 @@ export const HabitSettingsScreen = ({ onClose }: Props) => {
           value={habitName}
           onChangeText={setHabitName}
           placeholder="例：ランニング"
-          placeholderTextColor="#aaa"
+          placeholderTextColor={colors.textSecondary}
           maxLength={50}
         />
         <Text style={styles.label}>通知時刻</Text>
@@ -110,7 +111,7 @@ export const HabitSettingsScreen = ({ onClose }: Props) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: colors.background,
     justifyContent: 'space-between',
     padding: 24,
   },
@@ -123,10 +124,11 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 17,
     fontWeight: '600',
+    color: colors.textPrimary,
   },
   cancelText: {
     fontSize: 17,
-    color: '#007AFF',
+    color: colors.accent,
   },
   headerRight: {
     width: 60,
@@ -137,25 +139,25 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 14,
-    color: '#666',
+    color: colors.textSecondary,
     marginBottom: 8,
     marginTop: 24,
   },
   input: {
     borderBottomWidth: 2,
-    borderBottomColor: '#000',
+    borderBottomColor: colors.accent,
     fontSize: 20,
     paddingVertical: 8,
-    color: '#000',
+    color: colors.textPrimary,
   },
   button: {
-    backgroundColor: '#000',
+    backgroundColor: colors.accent,
     borderRadius: 12,
     paddingVertical: 16,
     alignItems: 'center',
   },
   buttonDisabled: {
-    backgroundColor: '#ccc',
+    backgroundColor: colors.border,
   },
   buttonText: {
     color: '#fff',

@@ -14,6 +14,7 @@ import { useUser } from '../contexts/UserContext';
 import { useHabit } from '../hooks/useHabit';
 import { loadPhotoPaths, updatePhotos } from '../services/photoService';
 import { scheduleHabitNotification } from '../services/notificationService';
+import { colors } from '../constants/colors';
 
 const MAX_PHOTOS = 5;
 
@@ -75,7 +76,7 @@ export const PhotoSettingsScreen = ({ onClose }: Props) => {
   if (loading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator />
+        <ActivityIndicator color={colors.accent} />
       </View>
     );
   }
@@ -128,7 +129,7 @@ const PHOTO_SIZE = 90;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: colors.background,
     padding: 24,
     justifyContent: 'space-between',
   },
@@ -136,6 +137,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: colors.background,
   },
   header: {
     flexDirection: 'row',
@@ -146,10 +148,11 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 17,
     fontWeight: '600',
+    color: colors.textPrimary,
   },
   cancelText: {
     fontSize: 17,
-    color: '#007AFF',
+    color: colors.accent,
   },
   headerRight: {
     width: 60,
@@ -174,7 +177,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: -8,
     right: -8,
-    backgroundColor: '#000',
+    backgroundColor: colors.textPrimary,
     borderRadius: 12,
     width: 24,
     height: 24,
@@ -191,28 +194,28 @@ const styles = StyleSheet.create({
     height: PHOTO_SIZE,
     borderRadius: 8,
     borderWidth: 2,
-    borderColor: '#ccc',
+    borderColor: colors.border,
     borderStyle: 'dashed',
     alignItems: 'center',
     justifyContent: 'center',
   },
   addText: {
     fontSize: 32,
-    color: '#ccc',
+    color: colors.textSecondary,
   },
   hint: {
     marginTop: 16,
     fontSize: 13,
-    color: '#999',
+    color: colors.textSecondary,
   },
   saveButton: {
-    backgroundColor: '#000',
+    backgroundColor: colors.accent,
     borderRadius: 12,
     paddingVertical: 16,
     alignItems: 'center',
   },
   saveButtonDisabled: {
-    backgroundColor: '#ccc',
+    backgroundColor: colors.border,
   },
   saveButtonText: {
     color: '#fff',

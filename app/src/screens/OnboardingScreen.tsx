@@ -13,6 +13,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import * as Notifications from 'expo-notifications';
 import * as ImagePicker from 'expo-image-picker';
 import type { HabitInput } from '../types/habit';
+import { colors } from '../constants/colors';
 
 type Props = {
   onComplete: (input: HabitInput, photoUris: string[]) => Promise<void>;
@@ -72,7 +73,7 @@ export const OnboardingScreen = ({ onComplete }: Props) => {
             value={habitName}
             onChangeText={setHabitName}
             placeholder="例：ランニング、参考書を開く"
-            placeholderTextColor="#aaa"
+            placeholderTextColor={colors.textSecondary}
             maxLength={50}
             autoFocus
           />
@@ -174,7 +175,7 @@ export const OnboardingScreen = ({ onComplete }: Props) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: colors.background,
     justifyContent: 'space-between',
     padding: 24,
   },
@@ -187,25 +188,28 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 32,
     lineHeight: 40,
+    color: colors.textPrimary,
   },
   input: {
     borderBottomWidth: 2,
-    borderBottomColor: '#000',
+    borderBottomColor: colors.accent,
     fontSize: 20,
     paddingVertical: 8,
-    color: '#000',
+    color: colors.textPrimary,
   },
   summary: {
     fontSize: 20,
     lineHeight: 36,
     marginBottom: 24,
+    color: colors.textPrimary,
   },
   highlight: {
     fontWeight: 'bold',
+    color: colors.accent,
   },
   description: {
     fontSize: 14,
-    color: '#666',
+    color: colors.textSecondary,
     lineHeight: 22,
     marginBottom: 16,
   },
@@ -229,7 +233,7 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: '#000',
+    backgroundColor: colors.textPrimary,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -240,23 +244,23 @@ const styles = StyleSheet.create({
   },
   addPhotoButton: {
     borderWidth: 1,
-    borderColor: '#000',
+    borderColor: colors.accent,
     borderRadius: 8,
     paddingVertical: 10,
     alignItems: 'center',
   },
   addPhotoButtonText: {
     fontSize: 15,
-    color: '#000',
+    color: colors.accent,
   },
   button: {
-    backgroundColor: '#000',
+    backgroundColor: colors.accent,
     borderRadius: 12,
     paddingVertical: 16,
     alignItems: 'center',
   },
   buttonDisabled: {
-    backgroundColor: '#ccc',
+    backgroundColor: colors.border,
   },
   buttonText: {
     color: '#fff',
