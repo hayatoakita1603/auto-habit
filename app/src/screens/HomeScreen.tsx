@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -12,6 +12,7 @@ import {
   Dimensions,
 } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import { useUser } from '../contexts/UserContext';
 import { useHabit } from '../hooks/useHabit';
 import { useAchievement } from '../hooks/useAchievement';
@@ -25,8 +26,10 @@ export const HomeScreen = () => {
   const { todayDone, streak, loading: achievementLoading, markDone } = useAchievement(
     hasHabit ? user : null
   );
-  const { photoPaths } = usePhotos(user);
+  const { photoPaths, refresh: refreshPhotos } = usePhotos(user);
   const [galleryVisible, setGalleryVisible] = useState(false);
+
+  useFocusEffect(useCallback(() => { refreshPhotos(); }, [refreshPhotos]));
 
   if (habitLoading || achievementLoading) {
     return (

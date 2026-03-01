@@ -1,14 +1,18 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import type { User } from 'firebase/auth';
 import { loadPhotoPaths } from '../services/photoService';
 
 export const usePhotos = (user: User | null) => {
   const [photoPaths, setPhotoPaths] = useState<string[]>([]);
 
-  useEffect(() => {
+  const refresh = useCallback(() => {
     if (!user) return;
     loadPhotoPaths(user.uid).then(setPhotoPaths);
   }, [user]);
 
-  return { photoPaths };
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
+
+  return { photoPaths, refresh };
 };
