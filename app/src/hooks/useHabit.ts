@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { User } from 'firebase/auth';
-import { getHabit, createHabit as createHabitInFirestore } from '../services/habitService';
+import { getHabit, createHabit as createHabitInFirestore, updateHabit as updateHabitInFirestore } from '../services/habitService';
 import type { Habit, HabitInput } from '../types/habit';
 
 type HabitState = {
@@ -8,6 +8,7 @@ type HabitState = {
   habit: Habit | null;
   loading: boolean;
   createHabit: (input: HabitInput) => Promise<void>;
+  updateHabit: (input: HabitInput) => Promise<void>;
 };
 
 export const useHabit = (user: User | null): HabitState => {
@@ -36,7 +37,16 @@ export const useHabit = (user: User | null): HabitState => {
     [user]
   );
 
+  const updateHabit = useCallback(
+    async (input: HabitInput) => {
+      if (!user || !habit) return;
+      await updateHabitInFirestore(user.uid, habit.id, input);
+      setHabit((prev) => (prev ? { ...prev, ...input } : prev));
+    },
+    [user, habit]
+  );
+
   const hasHabit = loading ? null : habit !== null;
 
-  return { hasHabit, habit, loading, createHabit };
+  return { hasHabit, habit, loading, createHabit, updateHabit };
 };

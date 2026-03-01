@@ -5,10 +5,12 @@ import type { Habit } from '../../src/types/habit';
 
 const mockGetHabit = jest.fn();
 const mockCreateHabit = jest.fn();
+const mockUpdateHabit = jest.fn();
 
 jest.mock('../../src/services/habitService', () => ({
   getHabit: (...args: unknown[]) => mockGetHabit(...args),
   createHabit: (...args: unknown[]) => mockCreateHabit(...args),
+  updateHabit: (...args: unknown[]) => mockUpdateHabit(...args),
 }));
 
 const mockUser = { uid: 'user-1' } as User;
@@ -78,5 +80,34 @@ describe('useHabit', () => {
 
     expect(result.current.hasHabit).toBe(true);
     expect(result.current.habit).toEqual(mockHabit);
+  });
+
+  it('updateHabitを呼ぶとhabit状態が新しい値に更新される', async () => {
+    mockGetHabit.mockResolvedValue(mockHabit);
+    mockUpdateHabit.mockResolvedValue(undefined);
+
+    const { result } = renderHook(() => useHabit(mockUser));
+    await act(async () => {});
+
+    const updatedInput = { name: '読書', schedule: { type: 'daily' as const, hour: 8, minute: 30 } };
+    await act(async () => {
+      await result.current.updateHabit(updatedInput);
+    });
+
+    expect(mockUpdateHabit).toHaveBeenCalledWith('user-1', 'habit-id-1', updatedInput);
+    expect(result.current.habit).toMatchObject({ name: '読書', schedule: { hour: 8, minute: 30 } });
+  });
+
+  it('updateHabitはhabitがnullの場合は何もしない', async () => {
+    mockGetHabit.mockResolvedValue(null);
+
+    const { result } = renderHook(() => useHabit(mockUser));
+    await act(async () => {});
+
+    await act(async () => {
+      await result.current.updateHabit({ name: '読書', schedule: { type: 'daily', hour: 8, minute: 30 } });
+    });
+
+    expect(mockUpdateHabit).not.toHaveBeenCalled();
   });
 });

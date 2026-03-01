@@ -1,6 +1,8 @@
 const mockAddDoc = jest.fn();
 const mockGetDocs = jest.fn();
+const mockUpdateDoc = jest.fn();
 const mockCollection = jest.fn();
+const mockDoc = jest.fn();
 const mockQuery = jest.fn();
 const mockLimit = jest.fn();
 const mockServerTimestamp = jest.fn(() => 'server-timestamp');
@@ -13,12 +15,14 @@ jest.mock('firebase/firestore', () => ({
   collection: (...args: unknown[]) => mockCollection(...args),
   addDoc: (...args: unknown[]) => mockAddDoc(...args),
   getDocs: (...args: unknown[]) => mockGetDocs(...args),
+  updateDoc: (...args: unknown[]) => mockUpdateDoc(...args),
+  doc: (...args: unknown[]) => mockDoc(...args),
   query: (...args: unknown[]) => mockQuery(...args),
   limit: (...args: unknown[]) => mockLimit(...args),
   serverTimestamp: () => mockServerTimestamp(),
 }));
 
-import { createHabit, hasHabit, getHabit } from '../../src/services/habitService';
+import { createHabit, hasHabit, getHabit, updateHabit } from '../../src/services/habitService';
 import type { HabitInput } from '../../src/types/habit';
 
 const mockInput: HabitInput = {
@@ -29,9 +33,10 @@ const mockInput: HabitInput = {
 describe('habitService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    // collection/queryのモック戻り値を設定（addDoc/getDocsの第1引数として渡る）
+    // collection/query/docのモック戻り値を設定（addDoc/getDocs/updateDocの第1引数として渡る）
     mockCollection.mockReturnValue({});
     mockQuery.mockReturnValue({});
+    mockDoc.mockReturnValue({});
   });
 
   describe('createHabit', () => {
@@ -88,6 +93,23 @@ describe('habitService', () => {
       await getHabit('user-1');
 
       expect(mockLimit).toHaveBeenCalledWith(1);
+    });
+  });
+
+  describe('updateHabit', () => {
+    it('Firestoreのhabitsドキュメントを更新する', async () => {
+      mockUpdateDoc.mockResolvedValue(undefined);
+
+      await updateHabit('user-1', 'habit-id-1', mockInput);
+
+      expect(mockDoc).toHaveBeenCalledWith({}, 'users', 'user-1', 'habits', 'habit-id-1');
+      expect(mockUpdateDoc).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          name: 'ランニング',
+          schedule: { type: 'daily', hour: 7, minute: 0 },
+        })
+      );
     });
   });
 

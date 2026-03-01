@@ -1,14 +1,14 @@
-import { collection, addDoc, getDocs, query, limit, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, getDocs, query, limit, serverTimestamp, doc, updateDoc } from 'firebase/firestore';
 import { db } from './firebase';
 import type { Habit, HabitInput } from '../types/habit';
 
 export const createHabit = async (uid: string, input: HabitInput): Promise<string> => {
   const ref = collection(db, 'users', uid, 'habits');
-  const doc = await addDoc(ref, {
+  const added = await addDoc(ref, {
     ...input,
     createdAt: serverTimestamp(),
   });
-  return doc.id;
+  return added.id;
 };
 
 export const getHabit = async (uid: string): Promise<Habit | null> => {
@@ -16,8 +16,13 @@ export const getHabit = async (uid: string): Promise<Habit | null> => {
   const q = query(ref, limit(1));
   const snapshot = await getDocs(q);
   if (snapshot.empty) return null;
-  const doc = snapshot.docs[0];
-  return { id: doc.id, ...(doc.data() as Omit<Habit, 'id'>) };
+  const docSnap = snapshot.docs[0];
+  return { id: docSnap.id, ...(docSnap.data() as Omit<Habit, 'id'>) };
+};
+
+export const updateHabit = async (uid: string, habitId: string, input: HabitInput): Promise<void> => {
+  const ref = doc(db, 'users', uid, 'habits', habitId);
+  await updateDoc(ref, { ...input });
 };
 
 // 全件取得を避けるためlimit(1)で存在確認のみ行う
