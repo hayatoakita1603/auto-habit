@@ -1,44 +1,36 @@
-import { render, screen, fireEvent, act } from '@testing-library/react-native';
+import { render, screen, waitFor } from '@testing-library/react-native';
 import type { User } from 'firebase/auth';
-import type { Habit } from '../../src/types/habit';
 
 const mockUser = { uid: 'user-1' } as User;
-
-const mockHabit: Habit = {
-  id: 'habit-id-1',
-  name: 'ランニング',
-  schedule: { type: 'daily', hour: 7, minute: 0 },
-  createdAt: new Date('2026-01-01'),
-};
-
-const mockUpdateHabit = jest.fn();
-const mockScheduleHabitNotification = jest.fn();
 const mockLoadPhotoPaths = jest.fn();
 
 jest.mock('../../src/contexts/UserContext', () => ({
   useUser: () => ({ user: mockUser }),
 }));
 
-jest.mock('../../src/hooks/useHabit', () => ({
-  useHabit: () => ({
-    habit: mockHabit,
-    loading: false,
-    updateHabit: mockUpdateHabit,
-  }),
-}));
-
-jest.mock('../../src/services/notificationService', () => ({
-  scheduleHabitNotification: (...args: unknown[]) => mockScheduleHabitNotification(...args),
-}));
-
 jest.mock('../../src/services/photoService', () => ({
   loadPhotoPaths: (...args: unknown[]) => mockLoadPhotoPaths(...args),
+  updatePhotos: jest.fn(),
 }));
 
-// DateTimePickerはネイティブ依存のためスタブ化
-jest.mock('@react-native-community/datetimepicker', () => {
+jest.mock('@react-navigation/native', () => ({
+  useFocusEffect: (cb: () => void) => cb(),
+}));
+
+jest.mock('../../src/screens/HabitSettingsScreen', () => ({
+  HabitSettingsScreen: () => null,
+}));
+jest.mock('../../src/screens/PhotoSettingsScreen', () => ({
+  PhotoSettingsScreen: () => null,
+}));
+
+jest.mock('react-native-safe-area-context', () => {
   const { View } = require('react-native');
-  return ({ testID }: { testID?: string }) => <View testID={testID ?? 'date-time-picker'} />;
+  return {
+    SafeAreaView: ({ children, ...props }: React.ComponentProps<typeof View>) => (
+      <View {...props}>{children}</View>
+    ),
+  };
 });
 
 import { SettingsScreen } from '../../src/screens/SettingsScreen';
@@ -47,49 +39,30 @@ describe('SettingsScreen', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockLoadPhotoPaths.mockResolvedValue([]);
-    mockUpdateHabit.mockResolvedValue(undefined);
-    mockScheduleHabitNotification.mockResolvedValue(undefined);
   });
 
-  it('習慣名と通知時刻が表示される', () => {
+  it('設定項目が2行表示される', () => {
     render(<SettingsScreen />);
 
-    expect(screen.getByDisplayValue('ランニング')).toBeTruthy();
-    expect(screen.getByTestId('time-picker')).toBeTruthy();
+    expect(screen.getByText('習慣名・通知時刻')).toBeTruthy();
+    expect(screen.getByText('モチベ写真')).toBeTruthy();
   });
 
-  it('保存ボタンを押すと updateHabit が呼ばれる', async () => {
+  it('写真が登録済みの場合は枚数が表示される', async () => {
+    mockLoadPhotoPaths.mockResolvedValue(['/a.jpg', '/b.jpg']);
+
     render(<SettingsScreen />);
 
-    await act(async () => {
-      fireEvent.press(screen.getByText('保存'));
-    });
-
-    expect(mockUpdateHabit).toHaveBeenCalledWith({
-      name: 'ランニング',
-      schedule: { type: 'daily', hour: 7, minute: 0 },
+    await waitFor(() => {
+      expect(screen.getByText('2枚')).toBeTruthy();
     });
   });
 
-  it('保存後に通知が再スケジュールされる', async () => {
-    mockLoadPhotoPaths.mockResolvedValue(['/photos/1.jpg']);
+  it('写真が0枚の場合は枚数が表示されない', async () => {
     render(<SettingsScreen />);
 
-    await act(async () => {
-      fireEvent.press(screen.getByText('保存'));
+    await waitFor(() => {
+      expect(screen.queryByText(/枚/)).toBeNull();
     });
-
-    expect(mockScheduleHabitNotification).toHaveBeenCalledWith(
-      expect.objectContaining({ name: 'ランニング' }),
-      ['/photos/1.jpg']
-    );
-  });
-
-  it('習慣名が空のとき保存ボタンが無効になる', () => {
-    render(<SettingsScreen />);
-
-    fireEvent.changeText(screen.getByDisplayValue('ランニング'), '');
-
-    expect(screen.getByTestId('save-button').props.accessibilityState?.disabled).toBe(true);
   });
 });

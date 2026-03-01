@@ -1,97 +1,80 @@
-import { useState, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import {
   View,
   Text,
-  TextInput,
   TouchableOpacity,
   StyleSheet,
-  SafeAreaView,
-  ActivityIndicator,
+  Modal,
 } from 'react-native';
-import DateTimePicker from '@react-native-community/datetimepicker';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import { useUser } from '../contexts/UserContext';
-import { useHabit } from '../hooks/useHabit';
-import { scheduleHabitNotification } from '../services/notificationService';
 import { loadPhotoPaths } from '../services/photoService';
-import type { Habit, HabitInput } from '../types/habit';
+import { HabitSettingsScreen } from './HabitSettingsScreen';
+import { PhotoSettingsScreen } from './PhotoSettingsScreen';
 
 export const SettingsScreen = () => {
   const { user } = useUser();
-  const { habit, loading, updateHabit } = useHabit(user);
+  const [habitModalVisible, setHabitModalVisible] = useState(false);
+  const [photoModalVisible, setPhotoModalVisible] = useState(false);
+  const [photoCount, setPhotoCount] = useState(0);
 
-  const [habitName, setHabitName] = useState('');
-  const [time, setTime] = useState(new Date(0, 0, 0, 7, 0));
-  const [initialized, setInitialized] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
+  const refreshPhotoCount = useCallback(async () => {
+    if (!user) return;
+    const paths = await loadPhotoPaths(user.uid);
+    setPhotoCount(paths.length);
+  }, [user]);
 
-  // habitロード後にフォームの初期値をセット
-  useEffect(() => {
-    if (habit && !initialized) {
-      setHabitName(habit.name);
-      setTime(new Date(0, 0, 0, habit.schedule.hour, habit.schedule.minute));
-      setInitialized(true);
-    }
-  }, [habit, initialized]);
+  // タブフォーカス時と写真モーダルを閉じた後に枚数を更新
+  useFocusEffect(useCallback(() => { refreshPhotoCount(); }, [refreshPhotoCount]));
 
-  if (loading) {
-    return (
-      <View style={styles.container}>
-        <ActivityIndicator />
-      </View>
-    );
-  }
-
-  const handleSave = async () => {
-    if (!habit || !user || isSaving) return;
-    setIsSaving(true);
-    try {
-      const input: HabitInput = {
-        name: habitName.trim(),
-        schedule: { type: 'daily', hour: time.getHours(), minute: time.getMinutes() },
-      };
-      await updateHabit(input);
-      // 保存直後に通知を再スケジュールする（App.tsxのhabit状態は更新されないため）
-      const updatedHabit: Habit = { ...habit, ...input };
-      const photoPaths = await loadPhotoPaths(user.uid);
-      await scheduleHabitNotification(updatedHabit, photoPaths);
-    } finally {
-      setIsSaving(false);
-    }
+  const handleClosePhotoModal = () => {
+    setPhotoModalVisible(false);
+    refreshPhotoCount();
   };
-
-  const isValid = habitName.trim().length > 0;
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <Text style={styles.label}>習慣名</Text>
-        <TextInput
-          style={styles.input}
-          value={habitName}
-          onChangeText={setHabitName}
-          placeholder="例：ランニング"
-          placeholderTextColor="#aaa"
-          maxLength={50}
-        />
-        <Text style={styles.label}>通知時刻</Text>
-        <DateTimePicker
-          testID="time-picker"
-          mode="time"
-          value={time}
-          onChange={(_, date) => date && setTime(date)}
-          display="spinner"
-          locale="ja"
-        />
+      <Text style={styles.heading}>設定</Text>
+
+      <View style={styles.list}>
+        <TouchableOpacity
+          style={styles.row}
+          onPress={() => setHabitModalVisible(true)}
+        >
+          <Text style={styles.rowLabel}>習慣名・通知時刻</Text>
+          <Text style={styles.chevron}>›</Text>
+        </TouchableOpacity>
+        <View style={styles.separator} />
+        <TouchableOpacity
+          style={styles.row}
+          onPress={() => setPhotoModalVisible(true)}
+        >
+          <Text style={styles.rowLabel}>モチベ写真</Text>
+          <View style={styles.rowRight}>
+            {photoCount > 0 && (
+              <Text style={styles.rowValue}>{photoCount}枚</Text>
+            )}
+            <Text style={styles.chevron}>›</Text>
+          </View>
+        </TouchableOpacity>
       </View>
-      <TouchableOpacity
-        testID="save-button"
-        style={[styles.button, (!isValid || isSaving) && styles.buttonDisabled]}
-        onPress={handleSave}
-        disabled={!isValid || isSaving}
-        accessibilityState={{ disabled: !isValid || isSaving }}
+
+      <Modal
+        visible={habitModalVisible}
+        animationType="slide"
+        onRequestClose={() => setHabitModalVisible(false)}
       >
-        <Text style={styles.buttonText}>保存</Text>
-      </TouchableOpacity>
+        <HabitSettingsScreen onClose={() => setHabitModalVisible(false)} />
+      </Modal>
+
+      <Modal
+        visible={photoModalVisible}
+        animationType="slide"
+        onRequestClose={handleClosePhotoModal}
+      >
+        <PhotoSettingsScreen onClose={handleClosePhotoModal} />
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -99,39 +82,48 @@ export const SettingsScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    justifyContent: 'space-between',
-    padding: 24,
+    backgroundColor: '#f2f2f7',
   },
-  content: {
-    flex: 1,
-    paddingTop: 16,
-  },
-  label: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 8,
-    marginTop: 24,
-  },
-  input: {
-    borderBottomWidth: 2,
-    borderBottomColor: '#000',
-    fontSize: 20,
-    paddingVertical: 8,
+  heading: {
+    fontSize: 34,
+    fontWeight: '700',
+    paddingHorizontal: 20,
+    paddingBottom: 12,
     color: '#000',
   },
-  button: {
-    backgroundColor: '#000',
+  list: {
+    backgroundColor: '#fff',
     borderRadius: 12,
-    paddingVertical: 16,
+    marginHorizontal: 16,
+    overflow: 'hidden',
+  },
+  row: {
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
   },
-  buttonDisabled: {
-    backgroundColor: '#ccc',
-  },
-  buttonText: {
-    color: '#fff',
+  rowLabel: {
     fontSize: 17,
-    fontWeight: '600',
+    color: '#000',
+  },
+  rowRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  rowValue: {
+    fontSize: 17,
+    color: '#8e8e93',
+  },
+  chevron: {
+    fontSize: 20,
+    color: '#c7c7cc',
+  },
+  separator: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: '#c6c6c8',
+    marginLeft: 16,
   },
 });

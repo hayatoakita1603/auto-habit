@@ -34,6 +34,36 @@ export const loadPhotoPaths = async (userId: string): Promise<string[]> => {
   return JSON.parse(json) as string[];
 };
 
+export const updatePhotos = async (
+  userId: string,
+  keptPaths: string[],
+  newUris: string[]
+): Promise<string[]> => {
+  // 削除対象ファイルを消す（元のリストにあるが維持リストにないパス）
+  const originalPaths = await loadPhotoPaths(userId);
+  const removedPaths = originalPaths.filter(p => !keptPaths.includes(p));
+  for (const path of removedPaths) {
+    const info = await FileSystem.getInfoAsync(path);
+    if (info.exists) await FileSystem.deleteAsync(path);
+  }
+
+  // 新規URIをコピー
+  const newPaths: string[] = [];
+  if (newUris.length > 0) {
+    await FileSystem.makeDirectoryAsync(PHOTO_DIR, { intermediates: true });
+    for (const uri of newUris) {
+      const filename = `${Date.now()}_${Math.random().toString(36).slice(2)}.jpg`;
+      const dest = `${PHOTO_DIR}${filename}`;
+      await FileSystem.copyAsync({ from: uri, to: dest });
+      newPaths.push(dest);
+    }
+  }
+
+  const finalPaths = [...keptPaths, ...newPaths];
+  await AsyncStorage.setItem(storageKey(userId), JSON.stringify(finalPaths));
+  return finalPaths;
+};
+
 export const deletePhotos = async (userId: string): Promise<void> => {
   const paths = await loadPhotoPaths(userId);
   for (const path of paths) {
