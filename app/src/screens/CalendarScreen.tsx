@@ -130,14 +130,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.accent,
     borderRadius: 4,
+    paddingBottom: 10,
   },
   dayText: {
     fontSize: 14,
     color: colors.textSecondary,
   },
   achievedText: {
-    color: '#FFFFFF',
-    paddingBottom: 10,
+    color: '#FFFFFF'
   },
   todayText: {
     color: colors.accent,

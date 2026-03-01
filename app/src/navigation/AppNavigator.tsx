@@ -1,4 +1,5 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { Ionicons } from '@expo/vector-icons';
 import { HomeScreen } from '../screens/HomeScreen';
 import { CalendarScreen } from '../screens/CalendarScreen';
 import { SettingsScreen } from '../screens/SettingsScreen';
@@ -21,17 +22,26 @@ export const AppNavigator = () => {
       <Tab.Screen
         name="Home"
         component={HomeScreen}
-        options={{ title: 'ホーム' }}
+        options={{
+          title: '記録',
+          tabBarIcon: ({ color, size }) => <Ionicons name="pencil" size={size} color={color} />,
+        }}
       />
       <Tab.Screen
         name="Calendar"
         component={CalendarScreen}
-        options={{ title: 'カレンダー' }}
+        options={{
+          title: '履歴',
+          tabBarIcon: ({ color, size }) => <Ionicons name="calendar-outline" size={size} color={color} />,
+        }}
       />
       <Tab.Screen
         name="Settings"
         component={SettingsScreen}
-        options={{ title: '設定' }}
+        options={{
+          title: '設定',
+          tabBarIcon: ({ color, size }) => <Ionicons name="settings-outline" size={size} color={color} />,
+        }}
       />
     </Tab.Navigator>
   );
