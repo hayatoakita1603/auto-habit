@@ -1,113 +1,129 @@
-import { renderHook, act } from '@testing-library/react-native';
-import { useHabit } from '../../src/hooks/useHabit';
-import type { User } from 'firebase/auth';
-import type { Habit } from '../../src/types/habit';
+import { act, renderHook } from "@testing-library/react-native";
+import type { User } from "firebase/auth";
+import { useHabit } from "../../src/hooks/useHabit";
+import type { Habit } from "../../src/types/habit";
 
 const mockGetHabit = jest.fn();
 const mockCreateHabit = jest.fn();
 const mockUpdateHabit = jest.fn();
 
-jest.mock('../../src/services/habitService', () => ({
-  getHabit: (...args: unknown[]) => mockGetHabit(...args),
-  createHabit: (...args: unknown[]) => mockCreateHabit(...args),
-  updateHabit: (...args: unknown[]) => mockUpdateHabit(...args),
+jest.mock("../../src/services/habitService", () => ({
+	getHabit: (...args: unknown[]) => mockGetHabit(...args),
+	createHabit: (...args: unknown[]) => mockCreateHabit(...args),
+	updateHabit: (...args: unknown[]) => mockUpdateHabit(...args),
 }));
 
-const mockUser = { uid: 'user-1' } as User;
+const mockUser = { uid: "user-1" } as User;
 
 const mockHabit: Habit = {
-  id: 'habit-id-1',
-  name: 'ランニング',
-  schedule: { type: 'daily', hour: 7, minute: 0 },
-  createdAt: new Date('2026-01-01'),
+	id: "habit-id-1",
+	name: "ランニング",
+	schedule: { type: "daily", hour: 7, minute: 0 },
+	createdAt: new Date("2026-01-01"),
 };
 
-describe('useHabit', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
+describe("useHabit", () => {
+	beforeEach(() => {
+		jest.clearAllMocks();
+	});
 
-  it('初期状態はloading: true, hasHabit: null', () => {
-    mockGetHabit.mockResolvedValue(null);
+	it("初期状態はloading: true, hasHabit: null", () => {
+		mockGetHabit.mockResolvedValue(null);
 
-    const { result } = renderHook(() => useHabit(mockUser));
+		const { result } = renderHook(() => useHabit(mockUser));
 
-    expect(result.current.loading).toBe(true);
-    expect(result.current.hasHabit).toBeNull();
-  });
+		expect(result.current.loading).toBe(true);
+		expect(result.current.hasHabit).toBeNull();
+	});
 
-  it('userがnullの場合はloading: false, hasHabit: falseになる', async () => {
-    const { result } = renderHook(() => useHabit(null));
-    await act(async () => {});
+	it("userがnullの場合はloading: false, hasHabit: falseになる", async () => {
+		const { result } = renderHook(() => useHabit(null));
+		await act(async () => {});
 
-    expect(result.current.loading).toBe(false);
-    expect(result.current.hasHabit).toBe(false);
-  });
+		expect(result.current.loading).toBe(false);
+		expect(result.current.hasHabit).toBe(false);
+	});
 
-  it('習慣が存在する場合はhasHabit: true、habit: Habitオブジェクトになる', async () => {
-    mockGetHabit.mockResolvedValue(mockHabit);
+	it("習慣が存在する場合はhasHabit: true、habit: Habitオブジェクトになる", async () => {
+		mockGetHabit.mockResolvedValue(mockHabit);
 
-    const { result } = renderHook(() => useHabit(mockUser));
-    await act(async () => {});
+		const { result } = renderHook(() => useHabit(mockUser));
+		await act(async () => {});
 
-    expect(result.current.hasHabit).toBe(true);
-    expect(result.current.habit).toEqual(mockHabit);
-    expect(result.current.loading).toBe(false);
-  });
+		expect(result.current.hasHabit).toBe(true);
+		expect(result.current.habit).toEqual(mockHabit);
+		expect(result.current.loading).toBe(false);
+	});
 
-  it('習慣が存在しない場合はhasHabit: false、habit: nullになる', async () => {
-    mockGetHabit.mockResolvedValue(null);
+	it("習慣が存在しない場合はhasHabit: false、habit: nullになる", async () => {
+		mockGetHabit.mockResolvedValue(null);
 
-    const { result } = renderHook(() => useHabit(mockUser));
-    await act(async () => {});
+		const { result } = renderHook(() => useHabit(mockUser));
+		await act(async () => {});
 
-    expect(result.current.hasHabit).toBe(false);
-    expect(result.current.habit).toBeNull();
-    expect(result.current.loading).toBe(false);
-  });
+		expect(result.current.hasHabit).toBe(false);
+		expect(result.current.habit).toBeNull();
+		expect(result.current.loading).toBe(false);
+	});
 
-  it('createHabitを呼ぶとhasHabit: true、habit: Habitオブジェクトになる', async () => {
-    // 初回はnull、createHabit後の再取得でhabitを返す
-    mockGetHabit.mockResolvedValueOnce(null).mockResolvedValueOnce(mockHabit);
-    mockCreateHabit.mockResolvedValue('habit-id-1');
+	it("createHabitを呼ぶとhasHabit: true、habit: Habitオブジェクトになる", async () => {
+		// 初回はnull、createHabit後の再取得でhabitを返す
+		mockGetHabit.mockResolvedValueOnce(null).mockResolvedValueOnce(mockHabit);
+		mockCreateHabit.mockResolvedValue("habit-id-1");
 
-    const { result } = renderHook(() => useHabit(mockUser));
-    await act(async () => {});
+		const { result } = renderHook(() => useHabit(mockUser));
+		await act(async () => {});
 
-    await act(async () => {
-      await result.current.createHabit({ name: 'ランニング', schedule: { type: 'daily', hour: 7, minute: 0 } });
-    });
+		await act(async () => {
+			await result.current.createHabit({
+				name: "ランニング",
+				schedule: { type: "daily", hour: 7, minute: 0 },
+			});
+		});
 
-    expect(result.current.hasHabit).toBe(true);
-    expect(result.current.habit).toEqual(mockHabit);
-  });
+		expect(result.current.hasHabit).toBe(true);
+		expect(result.current.habit).toEqual(mockHabit);
+	});
 
-  it('updateHabitを呼ぶとhabit状態が新しい値に更新される', async () => {
-    mockGetHabit.mockResolvedValue(mockHabit);
-    mockUpdateHabit.mockResolvedValue(undefined);
+	it("updateHabitを呼ぶとhabit状態が新しい値に更新される", async () => {
+		mockGetHabit.mockResolvedValue(mockHabit);
+		mockUpdateHabit.mockResolvedValue(undefined);
 
-    const { result } = renderHook(() => useHabit(mockUser));
-    await act(async () => {});
+		const { result } = renderHook(() => useHabit(mockUser));
+		await act(async () => {});
 
-    const updatedInput = { name: '読書', schedule: { type: 'daily' as const, hour: 8, minute: 30 } };
-    await act(async () => {
-      await result.current.updateHabit(updatedInput);
-    });
+		const updatedInput = {
+			name: "読書",
+			schedule: { type: "daily" as const, hour: 8, minute: 30 },
+		};
+		await act(async () => {
+			await result.current.updateHabit(updatedInput);
+		});
 
-    expect(mockUpdateHabit).toHaveBeenCalledWith('user-1', 'habit-id-1', updatedInput);
-    expect(result.current.habit).toMatchObject({ name: '読書', schedule: { hour: 8, minute: 30 } });
-  });
+		expect(mockUpdateHabit).toHaveBeenCalledWith(
+			"user-1",
+			"habit-id-1",
+			updatedInput,
+		);
+		expect(result.current.habit).toMatchObject({
+			name: "読書",
+			schedule: { hour: 8, minute: 30 },
+		});
+	});
 
-  it('updateHabitはhabitがnullの場合は何もしない', async () => {
-    mockGetHabit.mockResolvedValue(null);
+	it("updateHabitはhabitがnullの場合は何もしない", async () => {
+		mockGetHabit.mockResolvedValue(null);
 
-    const { result } = renderHook(() => useHabit(mockUser));
-    await act(async () => {});
+		const { result } = renderHook(() => useHabit(mockUser));
+		await act(async () => {});
 
-    await act(async () => {
-      await result.current.updateHabit({ name: '読書', schedule: { type: 'daily', hour: 8, minute: 30 } });
-    });
+		await act(async () => {
+			await result.current.updateHabit({
+				name: "読書",
+				schedule: { type: "daily", hour: 8, minute: 30 },
+			});
+		});
 
-    expect(mockUpdateHabit).not.toHaveBeenCalled();
-  });
+		expect(mockUpdateHabit).not.toHaveBeenCalled();
+	});
 });

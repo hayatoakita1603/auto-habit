@@ -1,8 +1,8 @@
-import { createContext, useContext } from 'react';
-import type { User } from 'firebase/auth';
+import type { User } from "firebase/auth";
+import { createContext, useContext } from "react";
 
 type UserContextValue = {
-  user: User | null;
+	user: User | null;
 };
 
 const UserContext = createContext<UserContextValue>({ user: null });
