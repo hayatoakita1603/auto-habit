@@ -1,0 +1,66 @@
+name: CI
+
+on:
+  push:
+
+jobs:
+  test:
+    name: Jest
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: yarn
+          cache-dependency-path: app/yarn.lock
+
+      # yarn.lockに基づいて依存関係をインストール（lockfileの変更は禁止）
+      - run: yarn install --frozen-lockfile
+
+      # コードスタイル・構文チェック
+      - name: Biome check
+        run: yarn lint
+
+      # TypeScriptの型チェック（バイナリは生成しない）
+      - name: Type check
+        run: yarn tsc --noEmit
+
+      # ユニットテスト実行
+      - name: Jest
+        run: yarn test
+
+  # staging・prd 両環境のTerraformファイルを並列チェック
+  terraform:
+    name: Terraform
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        env: [staging, prd]
+    defaults:
+      run:
+        working-directory: infra/environments/${{ matrix.env }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.14.5
+
+      # フォーマットチェック（infra全体。stagingジョブのみで1回実行）
+      - name: terraform fmt
+        if: matrix.env == 'staging'
+        run: terraform fmt -check -recursive
+        working-directory: infra
+
+      # GCSバックエンドへの接続をスキップして初期化（認証不要）
+      - name: terraform init
+        run: terraform init -backend=false
+
+      # 構文・設定の整合性チェック（GCPへの疎通なし）
+      - name: terraform validate
+        run: terraform validate
