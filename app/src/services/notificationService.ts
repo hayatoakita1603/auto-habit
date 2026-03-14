@@ -32,7 +32,9 @@ export const scheduleHabitNotification = async (
 		content: {
 			title: habit.name,
 			body,
-			...(photoPath ? { attachments: [{ url: photoPath }] } : {}),
+			...(photoPath
+				? { attachments: [{ identifier: null, type: null, url: photoPath }] }
+				: {}),
 		},
 		trigger: {
 			type: Notifications.SchedulableTriggerInputTypes.CALENDAR,
